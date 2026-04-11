@@ -24,7 +24,8 @@ export default function Home() {
     });
 
     const uploadData = await uploadRes.json();
-
+    const imageUrl = uploadData.secure_url;
+    
     // 2. Generate text
     const textRes = await fetch("/api/generate-text", {
       method: "POST",
