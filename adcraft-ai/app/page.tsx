@@ -65,9 +65,11 @@ export default function Home() {
 
           <h2 className="text-xl font-bold mt-4">Images</h2>
           <div className="grid grid-cols-3 gap-2">
-            {result.images.map((img: string, i: number) => (
+          {
+            result.images.map((img: string, i: number) => (
               <img key={i} src={img} />
-            ))}
+            ))
+          }
           </div>
         </div>
       )}
