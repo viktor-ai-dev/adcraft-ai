@@ -1,6 +1,6 @@
-import Image from "next/image";
+"use client";
+
 import { useState } from "react";
-import { text } from "stream/consumers";
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -8,28 +8,51 @@ export default function Home() {
   const [image, setImage] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
 
-
   const handleGenerate = async () => {
+    if (!image) {
+      alert("Ladda upp en bild först");
+      return;
+    }
 
-    // 1. TEXT
-    const textResult = await fetch("/api/generate-text", {
+    // 1. Upload image (FIXED)
+    const formData = new FormData();
+    formData.append("file", image);
+
+    const uploadRes = await fetch("/api/upload", {
       method: "POST",
-      body: JSON.stringify({name, description}),
+      body: formData,
     });
 
-    const textData = await textResult.json();
+    const uploadData = await uploadRes.json();
 
-    // 2. IMAGE (placeholder)
-    const imageResult = await fetch("/api/generate-images/", {
+    // 2. Generate text
+    const textRes = await fetch("/api/generate-text", {
       method: "POST",
-      body: JSON.stringify({}),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, description }),
     });
 
-    const imageData = await imageResult.json();
+    const textData = await textRes.json();
 
+    // 3. Generate images (FIXED)
+    const imageRes = await fetch("/api/generate-images", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        imageUrl: uploadData.secure_url,
+      }),
+    });
+
+    const imageData = await imageRes.json();
+
+    // 4. Save result (FIXED key)
     setResult({
       text: textData,
-      image: imageData
+      images: imageData,
     });
   };
 
@@ -38,6 +61,17 @@ export default function Home() {
       <h1 className="text-3xl font-bold mb-4">
         AdCraft AI
       </h1>
+
+      {/* FILE INPUT (NY) */}
+      <input
+        type="file"
+        className="mb-4"
+        onChange={(e) => {
+          if (e.target.files) {
+            setImage(e.target.files[0]);
+          }
+        }}
+      />
 
       <input
         placeholder="Product name"
@@ -60,16 +94,26 @@ export default function Home() {
 
       {result && (
         <div className="mt-6">
-          <h2 className="text-xl font-bold">Headlines</h2>
-          <pre>{result.text}</pre>
+          <h2 className="text-xl font-bold">Headlines & Copy</h2>
+          <pre className="bg-gray-100 p-2 rounded">
+            {result.text}
+          </pre>
 
           <h2 className="text-xl font-bold mt-4">Images</h2>
           <div className="grid grid-cols-3 gap-2">
-          {
-            result.images.map((img: string, i: number) => (
-              <img key={i} src={img} />
-            ))
-          }
+            {result.images?.length > 0 ? 
+            (
+              result.images.map((img: any, i: number) => (
+                <img
+                  key={i}
+                  src={img}
+                  className="rounded-lg"
+                />
+              ))
+            ) : 
+            (
+              <p>Inga bilder hittades</p>
+            )}
           </div>
         </div>
       )}
