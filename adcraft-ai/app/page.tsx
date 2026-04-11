@@ -4,28 +4,14 @@ import { useState } from "react";
 
 export default function Home() {
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [image, setImage] = useState<File | null>(null);
+  const [description, setDescription] = useState("")
   const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false)
 
   const handleGenerate = async () => {
-    if (!image) {
-      alert("Ladda upp en bild först");
-      return;
-    }
+   
+    setLoading(true);
 
-    // 1. Upload image (FIXED)
-    const formData = new FormData();
-    formData.append("file", image);
-
-    const uploadRes = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const uploadData = await uploadRes.json();
-    const imageUrl = uploadData.secure_url;
-    
     // 2. Generate text
     const textRes = await fetch("/api/generate-text", {
       method: "POST",
@@ -37,42 +23,30 @@ export default function Home() {
 
     const textData = await textRes.json();
 
-    // 3. Generate images (FIXED)
+    // 3. Generate images
     const imageRes = await fetch("/api/generate-images", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        imageUrl: uploadData.secure_url,
-      }),
+      body: JSON.stringify({ name, description }),
     });
 
     const imageData = await imageRes.json();
+    
+    if(imageData){
+      setLoading(false);
+    }
 
-    // 4. Save result (FIXED key)
     setResult({
       text: textData,
-      images: imageData,
+      images: imageData.image,
     });
   };
 
   return (
     <main className="p-10 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">
-        AdCraft AI
-      </h1>
-
-      {/* FILE INPUT (NY) */}
-      <input
-        type="file"
-        className="mb-4"
-        onChange={(e) => {
-          if (e.target.files) {
-            setImage(e.target.files[0]);
-          }
-        }}
-      />
+      <h1 className="text-3xl font-bold mb-4">AdCraft AI</h1>
 
       <input
         placeholder="Product name"
@@ -87,10 +61,11 @@ export default function Home() {
       />
 
       <button
+        disabled={loading}
         onClick={handleGenerate}
-        className="bg-black text-white px-4 py-2"
+        className="bg-black text-white px-4 py-2 disabled:opacity-50"
       >
-        Generate Ads
+        {loading ? "Generating.." : "Generate Ads"}
       </button>
 
       {result && (
@@ -102,17 +77,19 @@ export default function Home() {
 
           <h2 className="text-xl font-bold mt-4">Images</h2>
           <div className="grid grid-cols-3 gap-2">
-            {result.images?.length > 0 ? 
-            (
+            {result.images?.length > 0 ? (
               result.images.map((img: any, i: number) => (
-                <img
-                  key={i}
-                  src={img}
-                  className="rounded-lg"
-                />
+              <img
+                key={i}
+                src={
+                  img.startsWith("data:")
+                    ? img
+                    : `data:image/png;base64,${img}`
+                }
+                className="rounded"
+              />
               ))
-            ) : 
-            (
+            ) : (
               <p>Inga bilder hittades</p>
             )}
           </div>

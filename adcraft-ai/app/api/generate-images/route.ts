@@ -1,30 +1,42 @@
+import OpenAI from "openai";
 
-import Replicate from "replicate";
-
-const replicate = new Replicate({
-    auth: process.env.REPLICATE_API_KEY,
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
 });
 
-
 export async function POST(req: Request) {
-    const { imageUrl } = await req.json();
+  try {
+    const { name, description } = await req.json();
 
     const prompt = `
-    A premium ecommerce advertisement photo of this product.
-    Luxury lifestyle environment, cinematic lighting, high-end branding.
+    Professional ecommerce product photography of ${name}.
+
+    Description: ${description}.
+
+    The product is clearly visible, centered in frame.
+    Studio lighting, soft shadows, realistic reflections.
+    White or dark gradient background.
+    High-end advertising style, 8K detail.
     `;
 
-    const output = await replicate.run(
-        "stability-ai/sdxl:latest",
-        {
-            input: {
-                prompt,
-                image: imageUrl,
-                strength: 0.8,
-                num_outputs: 3
-            },
-        }
-    );
+    const response = await openai.images.generate({
+      model: "gpt-image-1",
+      prompt,
+      size: "1024x1024",
+    });
 
-    return Response.json(output);
+    const image = response.data[0];
+
+    return Response.json({
+        image: [image.b64_json],
+    });
+
+  } catch (error: any) {
+    console.error("OPENAI ERROR:", error);
+
+    return Response.json(
+      { error: error.message },
+      { status: 500 }
+    );
+  }
 }
