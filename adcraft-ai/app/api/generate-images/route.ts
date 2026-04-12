@@ -4,32 +4,47 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
+const styleMap: Record<string, string> = {
+  luxury: "luxury branding, gold accents, premium studio lighting",
+  minimal: "clean minimal design, white background, soft shadows",
+  bold: "high contrast, colorful, dramatic lighting",
+  tech: "futuristic, neon lighting, modern UI aesthetic",
+  viral: "social media ad style, eye-catching, dynamic composition",
+};
+
 export async function POST(req: Request) {
   try {
-    const { name, description } = await req.json();
+    const { name, description, style = "luxury" } = await req.json();
 
-    const prompt = `
-    Professional ecommerce product photography of ${name}.
+    const selectedStyle = styleMap[style] || styleMap.luxury;
 
-    Description: ${description}.
-
-    The product is clearly visible, centered in frame.
-    Studio lighting, soft shadows, realistic reflections.
-    White or dark gradient background.
-    High-end advertising style, 8K detail.
+    const basePrompt = `
+      Professional ecommerce product photography of ${name}.
+      Description: ${description}.
+      The product is clearly visible, centered in frame.
+      Studio lighting, soft shadows, realistic reflections.
+      High-end advertising style, ultra realistic.
+      Style: ${selectedStyle}.
     `;
 
-    const response = await openai.images.generate({
-      model: "gpt-image-1",
-      prompt,
-      size: "1024x1024",
-    });
+    // GENERATE 3 VARIATIONS
+    const images = await Promise.all(
+      Array.from({ length: 3 }).map(async () => {
+        const response = await openai.images.generate({
+          model: "gpt-image-1",
+          prompt: basePrompt,
+          size: "1024x1024",
+        });
 
-    const image = response.data[0];
+        const img = response.data[0];
 
-    return Response.json({
-        image: [image.b64_json],
-    });
+        return img.b64_json
+          ? `data:image/png;base64,${img.b64_json}`
+          : img.url;
+      })
+    );
+
+    return Response.json({ images });
 
   } catch (error: any) {
     console.error("OPENAI ERROR:", error);
