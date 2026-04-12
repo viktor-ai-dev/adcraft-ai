@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { z } from "zod";
 import { prisma } from "@../../../lib/prisma"
+import { rateLimit } from "@/lib/ratelimit";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -22,6 +23,16 @@ const styleMap: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+    
+    // Kolla rate limit
+    if(!rateLimit(ip)){
+      return Response.json(
+        {error: "Too many requests"},
+        {status: 429}
+      );
+    }
+
     const body = await req.json();
     const { name, description, style = "luxury" } = schema.parse(body);
 
