@@ -1,7 +1,15 @@
 import OpenAI from "openai";
+import { z } from "zod";
+import { prisma } from "@../../../lib/prisma"
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
+});
+
+const schema = z.object({
+  name: z.string().min(1),
+  description: z.string().min(1),
+  style: z.string().optional(),
 });
 
 const styleMap: Record<string, string> = {
@@ -14,7 +22,8 @@ const styleMap: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
-    const { name, description, style = "luxury" } = await req.json();
+    const body = await req.json();
+    const { name, description, style = "luxury" } = schema.parse(body);
 
     const selectedStyle = styleMap[style] || styleMap.luxury;
 
@@ -43,6 +52,16 @@ export async function POST(req: Request) {
           : img.url;
       })
     );
+
+    // Save to database
+    await prisma.ad.create({
+      data: {
+        name,
+        description,
+        style,
+        image: JSON.stringify(images),
+      },
+    });
 
     return Response.json({ images });
 
