@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { z } from "zod";
-import { prisma } from "@../../../lib/prisma"
+import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/ratelimit";
 
 const openai = new OpenAI({
@@ -15,21 +15,22 @@ const schema = z.object({
 
 const styleMap: Record<string, string> = {
   luxury: "luxury branding, gold accents, premium studio lighting",
-  minimal: "clean minimal design, white background, soft shadows",
+  minimal: "clean minimal design, white background",
   bold: "high contrast, colorful, dramatic lighting",
-  tech: "futuristic, neon lighting, modern UI aesthetic",
-  viral: "social media ad style, eye-catching, dynamic composition",
+  tech: "futuristic neon lighting, modern aesthetic",
+  viral: "social media ad, eye-catching composition",
 };
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
-    
-    // Kolla rate limit
-    if(!rateLimit(ip)){
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+
+    // RATE LIMIT FIXED
+    if (!rateLimit(ip, 10, 60000)) {
       return Response.json(
-        {error: "Too many requests"},
-        {status: 429}
+        { error: "Too many requests" },
+        { status: 429 }
       );
     }
 
@@ -38,39 +39,38 @@ export async function POST(req: Request) {
 
     const selectedStyle = styleMap[style] || styleMap.luxury;
 
-    const basePrompt = `
-      Professional ecommerce product photography of ${name}.
-      Description: ${description}.
-      The product is clearly visible, centered in frame.
-      Studio lighting, soft shadows, realistic reflections.
-      High-end advertising style, ultra realistic.
-      Style: ${selectedStyle}.
-    `;
+    const prompt = `
+Professional ecommerce product photography of ${name}.
+Description: ${description}.
+Style: ${selectedStyle}.
+Centered product, studio lighting, ultra realistic, 8K.
+`;
 
-    // GENERATE 3 VARIATIONS
+    // GENERATE 3 IMAGES
     const images = await Promise.all(
       Array.from({ length: 3 }).map(async () => {
         const response = await openai.images.generate({
           model: "gpt-image-1",
-          prompt: basePrompt,
+          prompt,
           size: "1024x1024",
         });
 
-        const img = response.data[0];
+        const img = response.data?.[0];
 
-        return img.b64_json
-          ? `data:image/png;base64,${img.b64_json}`
-          : img.url;
+        if (!img?.b64_json) {
+          throw new Error("No image returned from OpenAI");
+        }
+
+        return `data:image/png;base64,${img.b64_json}`;
       })
     );
 
-    // Save to database
     await prisma.ad.create({
       data: {
         name,
         description,
         style,
-        image: JSON.stringify(images),
+        images: JSON.stringify(images),
       },
     });
 

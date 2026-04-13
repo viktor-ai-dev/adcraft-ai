@@ -10,30 +10,44 @@ export default function Home() {
   const [style, setStyle] = useState("luxury");
 
   const handleGenerate = async () => {
+    // 🚨 BLOCK DOUBLE REQUESTS (FIX 429)
+    if (loading) return;
+
+    if (!name || !description) return;
+
     setLoading(true);
+    setResult(null);
 
-    const textRes = await fetch("/api/generate-text", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, description }),
-    });
+    try {
+      // TEXT GENERATION
+      const textRes = await fetch("/api/generate-text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, description, style }),
+      });
 
-    const textData = await textRes.json();
+      const textData = await textRes.json();
 
-    const imageRes = await fetch("/api/generate-images", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, description, style }),
-    });
+      // IMAGE GENERATION
+      const imageRes = await fetch("/api/generate-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, description, style }),
+      });
 
-    const imageData = await imageRes.json();
+      const imageData = await imageRes.json();
 
-    setResult({
-      text: textData,
-      images: imageData.images,
-    });
+      console.log("IMAGE API RESPONSE:", imageData);
 
-    setLoading(false);
+      setResult({
+        text: textData,
+        images: imageData.images || [],
+      });
+    } catch (error) {
+      console.error("GENERATION ERROR:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,21 +60,29 @@ export default function Home() {
           <p className="text-gray-500">
             Generate high-converting AI ads in seconds
           </p>
+
+          <a
+            href="/dashboard"
+            className="text-blue-500 underline text-sm"
+          >
+            View Dashboard →
+          </a>
         </div>
 
-        {/* INPUT CARD */}
+        {/* INPUT */}
         <div className="bg-white p-6 rounded-xl shadow space-y-3">
 
           <select
-          className="border p-3 w-full rounded"
-          onChange={(e) => setStyle(e.target.value)}>
-        
-          <option value="luxury">Luxury</option>
-          <option value="minimal">Minimal</option>
-          <option value="bold">Bold</option>
-          <option value="tech">Tech</option>
-          <option value="viral">Viral</option>
-        </select>
+            className="border p-3 w-full rounded"
+            value={style}
+            onChange={(e) => setStyle(e.target.value)}
+          >
+            <option value="luxury">Luxury</option>
+            <option value="minimal">Minimal</option>
+            <option value="bold">Bold</option>
+            <option value="tech">Tech</option>
+            <option value="viral">Viral</option>
+          </select>
 
           <input
             placeholder="Product name"
@@ -112,15 +134,16 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="grid grid-cols-3 gap-4">
-                  {result.images?.map((img: string, i: number) => (
+                  {(result.images || []).map((img: string, i: number) => (
                     <div
                       key={i}
                       className="group relative overflow-hidden rounded-xl shadow"
                     >
                       <img
                         src={img}
-                        className="w-full h-64 object-cover transform group-hover:scale-105 transition"
+                        className="h-64 w-full object-cover rounded-xl hover:scale-105 transition duration-300"
                       />
+
                       <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
                         Variation {i + 1}
                       </div>

@@ -1,0 +1,31 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+
+  ads       Ad[]
+}
+
+model Ad {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  style       String
+  prompt      String?
+  images      String
+  createdAt   DateTime @default(now())
+
+  // 🔥 RELATION BACK TO USER (FIXEN)
+  userId      String?
+  user        User?   @relation(fields: [userId], references: [id])
+}

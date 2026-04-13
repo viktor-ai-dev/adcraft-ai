@@ -1,24 +1,27 @@
 
-const requests = new Map();
+const requests = new Map<string, number[]>();
 
-export function rateLimit(ip: string){
+export function rateLimit(ip: string, limit = 10, windowMs = 60000) {
+  const now = Date.now();
 
-    const now = Date.now();
+  if (!requests.has(ip)) {
+    requests.set(ip, []);
+  }
 
-    if(!requests.has(ip)){
-        requests.set(ip,[])
-    }
+  const timestamps = requests.get(ip)!;
 
-    const timestamps = requests.get(ip);
+  // keep only recent requests
+  const recent = timestamps.filter(
+    (t) => now - t < windowMs
+  );
 
-    const recent = timestamps.filter(
-        (t: number) => now - t < 60000 // Recent om mindre än 60 sec
-    );
+  if (recent.length >= limit) {
+    requests.set(ip, recent);
+    return false;
+  }
 
-    if (recent.length > 10) {
-        return false;
-    }
+  recent.push(now);
+  requests.set(ip, recent);
 
-    recent.push(now);
-    requests.set()
+  return true; 
 }
