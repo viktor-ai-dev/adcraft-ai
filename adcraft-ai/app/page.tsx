@@ -1,6 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import toast from "react-hot-toast";
+
+const styles = [
+  { key: "luxury", label: "Luxury", desc: "Premium gold & black" },
+  { key: "minimal", label: "Minimal", desc: "Clean white aesthetic" },
+  { key: "bold", label: "Bold", desc: "Colorful & loud" },
+  { key: "tech", label: "Tech", desc: "Futuristic neon" },
+  { key: "viral", label: "Viral", desc: "Social media style" },
+];
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -10,16 +20,13 @@ export default function Home() {
   const [style, setStyle] = useState("luxury");
 
   const handleGenerate = async () => {
-    // 🚨 BLOCK DOUBLE REQUESTS (FIX 429)
     if (loading) return;
-
     if (!name || !description) return;
 
     setLoading(true);
     setResult(null);
 
     try {
-      // TEXT GENERATION
       const textRes = await fetch("/api/generate-text", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28,7 +35,6 @@ export default function Home() {
 
       const textData = await textRes.json();
 
-      // IMAGE GENERATION
       const imageRes = await fetch("/api/generate-images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -37,14 +43,13 @@ export default function Home() {
 
       const imageData = await imageRes.json();
 
-      console.log("IMAGE API RESPONSE:", imageData);
-
       setResult({
-        text: textData,
-        images: imageData.images || [],
+        text: textData || {},
+        images: imageData?.images || [],
       });
     } catch (error) {
       console.error("GENERATION ERROR:", error);
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -61,28 +66,32 @@ export default function Home() {
             Generate high-converting AI ads in seconds
           </p>
 
-          <a
-            href="/dashboard"
-            className="text-blue-500 underline text-sm"
-          >
+          <a href="/dashboard" className="text-blue-500 underline text-sm">
             View Dashboard →
           </a>
         </div>
 
         {/* INPUT */}
-        <div className="bg-white p-6 rounded-xl shadow space-y-3">
+        <div className="bg-white p-6 rounded-xl shadow space-y-4">
 
-          <select
-            className="border p-3 w-full rounded"
-            value={style}
-            onChange={(e) => setStyle(e.target.value)}
-          >
-            <option value="luxury">Luxury</option>
-            <option value="minimal">Minimal</option>
-            <option value="bold">Bold</option>
-            <option value="tech">Tech</option>
-            <option value="viral">Viral</option>
-          </select>
+          {/* STYLE */}
+          <div className="grid grid-cols-2 gap-3">
+            {styles.map((s) => (
+              <div
+                key={s.key}
+                onClick={() => setStyle(s.key)}
+                className={`cursor-pointer border p-4 rounded-xl transition 
+                ${
+                  style === s.key
+                    ? "border-black bg-black text-white"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                <h3 className="font-bold">{s.label}</h3>
+                <p className="text-xs opacity-70">{s.desc}</p>
+              </div>
+            ))}
+          </div>
 
           <input
             placeholder="Product name"
@@ -99,22 +108,90 @@ export default function Home() {
           <button
             disabled={loading}
             onClick={handleGenerate}
-            className="bg-black text-white px-4 py-3 rounded w-full disabled:opacity-50"
+            className="bg-black text-white px-4 py-3 rounded w-full hover:opacity-90 active:scale-95 transition disabled:opacity-50"
           >
             {loading ? "Generating ads..." : "Generate Ads"}
           </button>
         </div>
 
-        {/* RESULTS */}
-        {result && (
-          <div className="space-y-6">
+        {/* LOADING STATE */}
+        {loading && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500 animate-pulse">
+              ✨ Writing ad copy...
+            </p>
+            <p className="text-sm text-gray-500 animate-pulse">
+              🎨 Generating visuals...
+            </p>
+            <p className="text-sm text-gray-500 animate-pulse">
+              🚀 Finalizing campaign...
+            </p>
 
-            {/* TEXT */}
-            <div className="bg-white p-6 rounded-xl shadow">
-              <h2 className="text-xl font-bold mb-2">Ad Copy</h2>
-              <pre className="text-sm whitespace-pre-wrap text-gray-700">
-                {result.text}
-              </pre>
+            <div className="grid grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-64 bg-gray-200 animate-pulse rounded-xl"
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* RESULTS */}
+        {result && !loading && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+
+            {/* AD PACK */}
+            <div className="bg-white p-6 rounded-xl shadow space-y-4">
+              <h2 className="text-xl font-bold">Ad Pack</h2>
+
+              {result.text?.headlines && (
+                <div>
+                  <h3 className="font-semibold mb-1">Headlines</h3>
+                  {result.text.headlines.map((h: string, i: number) => (
+                    <div key={i} className="bg-gray-100 p-2 rounded mb-1 text-sm">
+                      {h}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {result.text?.primaryTexts && (
+                <div>
+                  <h3 className="font-semibold mb-1">Primary Text</h3>
+                  {result.text.primaryTexts.map((t: string, i: number) => (
+                    <div key={i} className="bg-gray-100 p-2 rounded mb-1 text-sm">
+                      {t}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {result.text?.cta && (
+                <div>
+                  <h3 className="font-semibold mb-1">CTA</h3>
+                  <div className="bg-black text-white px-4 py-2 rounded inline-block text-sm">
+                    {result.text.cta}
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    JSON.stringify(result.text, null, 2)
+                  );
+                  toast.success("Ad copied!");
+                }}
+                className="text-blue-500 text-sm underline"
+              >
+                Copy Ad Pack
+              </button>
             </div>
 
             {/* IMAGES */}
@@ -123,28 +200,24 @@ export default function Home() {
                 Generated Ad Variations
               </h2>
 
-              {loading ? (
-                <div className="grid grid-cols-3 gap-4">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="h-64 bg-gray-200 animate-pulse rounded-xl"
-                    />
-                  ))}
-                </div>
+              {result.images.length === 0 ? (
+                <p className="text-gray-500 text-sm">
+                  No images generated
+                </p>
               ) : (
                 <div className="grid grid-cols-3 gap-4">
-                  {(result.images || []).map((img: string, i: number) => (
+                  {result.images.map((img: string, i: number) => (
                     <div
                       key={i}
                       className="group relative overflow-hidden rounded-xl shadow"
                     >
-                      <img
+                      <motion.img
                         src={img}
-                        className="h-64 w-full object-cover rounded-xl hover:scale-105 transition duration-300"
+                        whileHover={{ scale: 1.05 }}
+                        className="h-64 w-full object-cover rounded-xl"
                       />
 
-                      <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                      <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
                         Variation {i + 1}
                       </div>
                     </div>
@@ -153,7 +226,7 @@ export default function Home() {
               )}
             </div>
 
-          </div>
+          </motion.div>
         )}
 
       </div>

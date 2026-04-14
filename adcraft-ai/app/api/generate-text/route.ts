@@ -1,33 +1,48 @@
 import OpenAI from "openai";
+import { z } from "zod";
 
 const openai = new OpenAI({
-    apiKey : process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY!,
 });
 
+const schema = z.object({
+  name: z.string(),
+  description: z.string(),
+  style: z.string(),
+});
 
 export async function POST(req: Request) {
-    const {name, description} = await req.json();
+  try {
+    const { name, description, style } = schema.parse(await req.json());
 
     const prompt = `
-    You are an expert e-commerce marketer.
+    You are a professional ecommerce marketer.
+
+    Create a high-converting ad pack for:
 
     Product: ${name}
     Description: ${description}
+    Style: ${style}
 
-    Return:
-    - 3 ad headlines
-    - 1 ad copy
-    - 1 marketing angle
-    - target audience
+    Return JSON:
+    {
+    "headlines": ["", "", ""],
+    "primaryTexts": ["", "", ""],
+    "cta": ""
+    }
     `;
 
-    const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        "messages": [
-            {role:"system", content:"You are a marketing expert."},
-            {role:"user", content:prompt},
-        ],
+    const res = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
     });
 
-    return Response.json(completion.choices[0].message.content)
+    const data = JSON.parse(res.choices[0].message.content!);
+
+    return Response.json(data);
+
+  } catch (err: any) {
+    return Response.json({ error: err.message }, { status: 500 });
+  }
 }

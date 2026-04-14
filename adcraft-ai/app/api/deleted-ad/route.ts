@@ -8,5 +8,5 @@ export async function POST(req: Request) {
     where: { id },
   });
 
-  return Response.redirect(new URL("/dashboard", req.url));
+  return Response.redirect("/dashboard");
 }
