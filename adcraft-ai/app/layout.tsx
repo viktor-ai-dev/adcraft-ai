@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({children}: {children: React.ReactNode;}) {
-  
+
   const { userId } = auth(); // ✅ SERVER SAFE
 
   return (
@@ -33,18 +33,18 @@ export default function RootLayout({children}: {children: React.ReactNode;}) {
             <h1 className="font-bold text-xl">AdCraft AI</h1>
 
             <div className="flex items-center gap-4">
-              {!userId ? (
-                <>
-                  <SignInButton />
-                  <SignUpButton>
-                    <button className="bg-black text-white px-4 py-2 rounded-lg">
-                      Sign Up
-                    </button>
-                  </SignUpButton>
-                </>
-              ) : (
-                <UserButton />
-              )}
+              {
+                !userId ? (
+                  <>
+                    <SignInButton />
+                    <SignUpButton>
+                      <button className="bg-black text-white px-4 py-2 rounded-lg">
+                        Sign Up
+                      </button>
+                    </SignUpButton>
+                  </>
+                ) : ( <UserButton />)
+              }
             </div>
           </header>
 
