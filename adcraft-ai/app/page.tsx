@@ -2,23 +2,6 @@ export default function Landing() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
 
-      {/* NAV */}
-      <div className="flex justify-between items-center p-6 max-w-6xl mx-auto">
-        <h1 className="font-bold text-xl">AdCraft AI</h1>
-
-        <div className="space-x-4 text-sm">
-          <a href="/dashboard" className="hover:underline">
-            Dashboard
-          </a>
-          <a
-            href="/"
-            className="bg-black text-white px-4 py-2 rounded-lg"
-          >
-            Try Free
-          </a>
-        </div>
-      </div>
-
       {/* HERO */}
       <section className="text-center py-24 px-6 max-w-4xl mx-auto">
         <h2 className="text-5xl font-bold leading-tight">
@@ -73,12 +56,11 @@ export default function Landing() {
         ))}
       </section>
 
-      {/* PRICING (FAKE SAAS = IMPORTANT) */}
+      {/* PRICING */}
       <section className="py-20 px-6 text-center">
         <h2 className="text-3xl font-bold mb-10">Pricing</h2>
 
         <div className="grid grid-cols-3 gap-6 max-w-5xl mx-auto">
-
           {[
             {
               name: "Starter",
@@ -137,7 +119,7 @@ export default function Landing() {
 
       {/* FOOTER */}
       <footer className="text-center text-sm text-gray-400 py-10">
-        © {new Date().getFullYear()} AdCraft AI. All rights reserved.
+        © {new Date().getFullYear()} AdCraft AI
       </footer>
 
     </main>
