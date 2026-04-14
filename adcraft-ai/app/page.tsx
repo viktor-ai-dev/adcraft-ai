@@ -1,235 +1,145 @@
-"use client";
-
-import { useState } from "react";
-import { motion } from "framer-motion";
-import toast from "react-hot-toast";
-
-const styles = [
-  { key: "luxury", label: "Luxury", desc: "Premium gold & black" },
-  { key: "minimal", label: "Minimal", desc: "Clean white aesthetic" },
-  { key: "bold", label: "Bold", desc: "Colorful & loud" },
-  { key: "tech", label: "Tech", desc: "Futuristic neon" },
-  { key: "viral", label: "Viral", desc: "Social media style" },
-];
-
-export default function Home() {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [result, setResult] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [style, setStyle] = useState("luxury");
-
-  const handleGenerate = async () => {
-    if (loading) return;
-    if (!name || !description) return;
-
-    setLoading(true);
-    setResult(null);
-
-    try {
-      const textRes = await fetch("/api/generate-text", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, style }),
-      });
-
-      const textData = await textRes.json();
-
-      const imageRes = await fetch("/api/generate-images", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, style }),
-      });
-
-      const imageData = await imageRes.json();
-
-      setResult({
-        text: textData || {},
-        images: imageData?.images || [],
-      });
-    } catch (error) {
-      console.error("GENERATION ERROR:", error);
-      toast.error("Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default function Landing() {
   return (
-    <main className="min-h-screen bg-gray-50 flex justify-center p-8">
-      <div className="w-full max-w-3xl space-y-6">
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
 
-        {/* HEADER */}
-        <div className="text-center">
-          <h1 className="text-4xl font-bold">AdCraft AI</h1>
-          <p className="text-gray-500">
-            Generate high-converting AI ads in seconds
-          </p>
+      {/* NAV */}
+      <div className="flex justify-between items-center p-6 max-w-6xl mx-auto">
+        <h1 className="font-bold text-xl">AdCraft AI</h1>
 
-          <a href="/dashboard" className="text-blue-500 underline text-sm">
-            View Dashboard →
+        <div className="space-x-4 text-sm">
+          <a href="/dashboard" className="hover:underline">
+            Dashboard
+          </a>
+          <a
+            href="/"
+            className="bg-black text-white px-4 py-2 rounded-lg"
+          >
+            Try Free
           </a>
         </div>
+      </div>
 
-        {/* INPUT */}
-        <div className="bg-white p-6 rounded-xl shadow space-y-4">
+      {/* HERO */}
+      <section className="text-center py-24 px-6 max-w-4xl mx-auto">
+        <h2 className="text-5xl font-bold leading-tight">
+          Create high-converting ads with AI in seconds
+        </h2>
 
-          {/* STYLE */}
-          <div className="grid grid-cols-2 gap-3">
-            {styles.map((s) => (
-              <div
-                key={s.key}
-                onClick={() => setStyle(s.key)}
-                className={`cursor-pointer border p-4 rounded-xl transition 
-                ${
-                  style === s.key
-                    ? "border-black bg-black text-white"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                <h3 className="font-bold">{s.label}</h3>
-                <p className="text-xs opacity-70">{s.desc}</p>
-              </div>
-            ))}
-          </div>
+        <p className="text-gray-500 mt-6 text-lg">
+          Generate product ads, visuals, and copy for e-commerce brands instantly.
+          No design skills required.
+        </p>
 
-          <input
-            placeholder="Product name"
-            className="border p-3 w-full rounded"
-            onChange={(e) => setName(e.target.value)}
-          />
-
-          <textarea
-            placeholder="Product description"
-            className="border p-3 w-full rounded"
-            onChange={(e) => setDescription(e.target.value)}
-          />
-
-          <button
-            disabled={loading}
-            onClick={handleGenerate}
-            className="bg-black text-white px-4 py-3 rounded w-full hover:opacity-90 active:scale-95 transition disabled:opacity-50"
+        <div className="mt-8 flex justify-center gap-4">
+          <a
+            href="/dashboard"
+            className="bg-black text-white px-6 py-3 rounded-xl"
           >
-            {loading ? "Generating ads..." : "Generate Ads"}
-          </button>
+            Launch Dashboard
+          </a>
+
+          <a
+            href="/"
+            className="border px-6 py-3 rounded-xl"
+          >
+            View Demo
+          </a>
         </div>
+      </section>
 
-        {/* LOADING STATE */}
-        {loading && (
-          <div className="space-y-4">
-            <p className="text-sm text-gray-500 animate-pulse">
-              ✨ Writing ad copy...
-            </p>
-            <p className="text-sm text-gray-500 animate-pulse">
-              🎨 Generating visuals...
-            </p>
-            <p className="text-sm text-gray-500 animate-pulse">
-              🚀 Finalizing campaign...
-            </p>
-
-            <div className="grid grid-cols-3 gap-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-64 bg-gray-200 animate-pulse rounded-xl"
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* RESULTS */}
-        {result && !loading && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
+      {/* FEATURES */}
+      <section className="grid grid-cols-3 gap-6 max-w-5xl mx-auto px-6 py-12">
+        {[
+          {
+            title: "AI Ad Copy",
+            desc: "Generate high-converting headlines and descriptions",
+          },
+          {
+            title: "Image Generation",
+            desc: "Create studio-quality product visuals instantly",
+          },
+          {
+            title: "Multi Variations",
+            desc: "Get 3+ ad variations for every product",
+          },
+        ].map((f) => (
+          <div
+            key={f.title}
+            className="p-6 bg-white rounded-xl shadow hover:shadow-lg transition"
           >
+            <h3 className="font-bold mb-2">{f.title}</h3>
+            <p className="text-sm text-gray-500">{f.desc}</p>
+          </div>
+        ))}
+      </section>
 
-            {/* AD PACK */}
-            <div className="bg-white p-6 rounded-xl shadow space-y-4">
-              <h2 className="text-xl font-bold">Ad Pack</h2>
+      {/* PRICING (FAKE SAAS = IMPORTANT) */}
+      <section className="py-20 px-6 text-center">
+        <h2 className="text-3xl font-bold mb-10">Pricing</h2>
 
-              {result.text?.headlines && (
-                <div>
-                  <h3 className="font-semibold mb-1">Headlines</h3>
-                  {result.text.headlines.map((h: string, i: number) => (
-                    <div key={i} className="bg-gray-100 p-2 rounded mb-1 text-sm">
-                      {h}
-                    </div>
-                  ))}
-                </div>
-              )}
+        <div className="grid grid-cols-3 gap-6 max-w-5xl mx-auto">
 
-              {result.text?.primaryTexts && (
-                <div>
-                  <h3 className="font-semibold mb-1">Primary Text</h3>
-                  {result.text.primaryTexts.map((t: string, i: number) => (
-                    <div key={i} className="bg-gray-100 p-2 rounded mb-1 text-sm">
-                      {t}
-                    </div>
-                  ))}
-                </div>
-              )}
+          {[
+            {
+              name: "Starter",
+              price: "Free",
+              features: ["5 ads / day", "Basic images", "Watermark"],
+            },
+            {
+              name: "Pro",
+              price: "$19/mo",
+              features: ["Unlimited ads", "HD images", "No watermark"],
+            },
+            {
+              name: "Agency",
+              price: "$49/mo",
+              features: ["Client mode", "Bulk generation", "API access"],
+            },
+          ].map((plan) => (
+            <div
+              key={plan.name}
+              className="border rounded-xl p-6 bg-white hover:scale-105 transition"
+            >
+              <h3 className="font-bold text-xl">{plan.name}</h3>
+              <p className="text-2xl my-4">{plan.price}</p>
 
-              {result.text?.cta && (
-                <div>
-                  <h3 className="font-semibold mb-1">CTA</h3>
-                  <div className="bg-black text-white px-4 py-2 rounded inline-block text-sm">
-                    {result.text.cta}
-                  </div>
-                </div>
-              )}
+              <ul className="text-sm text-gray-500 space-y-2">
+                {plan.features.map((f) => (
+                  <li key={f}>• {f}</li>
+                ))}
+              </ul>
 
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(
-                    JSON.stringify(result.text, null, 2)
-                  );
-                  toast.success("Ad copied!");
-                }}
-                className="text-blue-500 text-sm underline"
-              >
-                Copy Ad Pack
+              <button className="mt-6 bg-black text-white px-4 py-2 rounded w-full">
+                Get Started
               </button>
             </div>
+          ))}
+        </div>
+      </section>
 
-            {/* IMAGES */}
-            <div className="bg-white p-6 rounded-xl shadow">
-              <h2 className="text-xl font-bold mb-4">
-                Generated Ad Variations
-              </h2>
+      {/* CTA */}
+      <section className="text-center py-20 bg-black text-white">
+        <h2 className="text-3xl font-bold">
+          Start creating ads in seconds
+        </h2>
 
-              {result.images.length === 0 ? (
-                <p className="text-gray-500 text-sm">
-                  No images generated
-                </p>
-              ) : (
-                <div className="grid grid-cols-3 gap-4">
-                  {result.images.map((img: string, i: number) => (
-                    <div
-                      key={i}
-                      className="group relative overflow-hidden rounded-xl shadow"
-                    >
-                      <motion.img
-                        src={img}
-                        whileHover={{ scale: 1.05 }}
-                        className="h-64 w-full object-cover rounded-xl"
-                      />
+        <p className="text-gray-300 mt-4">
+          Join thousands of ecommerce brands using AI
+        </p>
 
-                      <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                        Variation {i + 1}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+        <a
+          href="/dashboard"
+          className="inline-block mt-6 bg-white text-black px-6 py-3 rounded-xl"
+        >
+          Open Dashboard
+        </a>
+      </section>
 
-          </motion.div>
-        )}
+      {/* FOOTER */}
+      <footer className="text-center text-sm text-gray-400 py-10">
+        © {new Date().getFullYear()} AdCraft AI. All rights reserved.
+      </footer>
 
-      </div>
     </main>
   );
 }
