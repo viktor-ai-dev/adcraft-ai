@@ -1,64 +1,102 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
-export default function AdCard({ ad }: any) {
-  const [copied, setCopied] = useState(false);
+export default function AdCard({ ad, onDelete }: any) {
+  const [hovered, setHovered] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const images = JSON.parse(ad.images || "[]");
 
   const handleCopy = () => {
-    if (!ad?.prompt) return;
-
-    navigator.clipboard.writeText(ad.prompt);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    navigator.clipboard.writeText(ad.description);
+    toast.success("Copied to clipboard ✨");
   };
 
-  let images: string[] = [];
+  const handleDelete = async () => {
+    const confirmDelete = confirm("Delete this ad?");
+    if (!confirmDelete) return;
 
-  try {
-    images = ad.images ? JSON.parse(ad.images) : [];
-  } catch (e) {
-    images = [];
-  }
+    setLoading(true);
+
+    try {
+      await fetch("/api/delete-ad", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: ad.id }),
+      });
+
+      toast.success("Ad deleted 🗑️");
+
+      // 🔥 Optimistic update (ingen reload)
+      onDelete(ad.id);
+
+    } catch (err) {
+      toast.error("Failed to delete");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="border rounded-xl p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group bg-white">
-
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="group relative bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden"
+    >
       {/* IMAGE */}
-      <div className="aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden">
-        {images.length > 0 ? (
-          <img
-            src={images[0]}
-            alt={ad.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-            No image
-          </div>
-        )}
+      <div className="relative h-48 overflow-hidden">
+        <img
+          src={images?.[0] || "/placeholder.png"}
+          className="w-full h-full object-cover transition duration-500 group-hover:scale-110"
+        />
+
+        {/* GRADIENT */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
+
+        {/* ACTIONS */}
+        <div
+          className={`absolute top-2 right-2 flex gap-2 transition ${
+            hovered ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <button
+            onClick={handleCopy}
+            className="bg-white text-xs px-2 py-1 rounded shadow hover:bg-gray-100"
+          >
+            Copy
+          </button>
+
+          <button
+            disabled={loading}
+            onClick={handleDelete}
+            className="bg-red-500 text-white text-xs px-2 py-1 rounded shadow hover:bg-red-600 disabled:opacity-50"
+          >
+            {loading ? "..." : "Delete"}
+          </button>
+        </div>
+
+        {/* TITLE */}
+        <div className="absolute bottom-2 left-2 text-white text-sm font-semibold">
+          {ad.name}
+        </div>
       </div>
 
-      {/* TITLE */}
-      <h2 className="font-semibold text-lg">{ad.name}</h2>
-      <p className="text-sm text-gray-500">{ad.style}</p>
+      {/* CONTENT */}
+      <div className="p-4 space-y-2">
+        <p className="text-xs text-gray-500 line-clamp-2">
+          {ad.description}
+        </p>
 
-      {/* ACTIONS */}
-      <div className="flex gap-2 mt-3">
-
-        {/* COPY PROMPT */}
-        <button
-          onClick={handleCopy}
-          className="text-xs px-3 py-1 border rounded hover:bg-black hover:text-white transition"
-        >
-          {copied ? "Copied!" : "Copy prompt"}
-        </button>
-
-        {/* DELETE */}
-        <button className="text-xs px-3 py-1 border rounded text-red-500 hover:bg-red-500 hover:text-white transition">
-          Delete
-        </button>
-
+        <div className="flex justify-between items-center text-xs text-gray-400">
+          <span>{ad.style}</span>
+          <span>
+            {new Date(ad.createdAt).toLocaleDateString()}
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -1,23 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import AdCard from "@/components/AdCard";
+import DashboardClient from "./DashboardClient";
 
-
-export default async function DashboardPage() {
-
-  const ads = await prisma.ad.findMany(
-  {
+export default async function Page() {
+  const ads = await prisma.ad.findMany({
     orderBy: { createdAt: "desc" },
   });
 
-  return (
-   
-  <div className="grid grid-cols-3 gap-4xl">
-  {
-    ads.map((ad) => (
-      <AdCard key={ad.id} ad={ad} />
-    ))
-  }
-  </div>
-    
-  );
+  return <DashboardClient initialAds={ads} />;
 }

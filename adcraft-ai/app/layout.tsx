@@ -3,6 +3,8 @@ import { ClerkProvider, SignInButton, SignUpButton, UserButton } from "@clerk/ne
 import { auth } from "@clerk/nextjs/server";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,7 +49,7 @@ export default function RootLayout({children}: {children: React.ReactNode;}) {
             }
             </div>
           </header>
-
+          <Toaster position="top-right" />
           {children}
         </body>
       </html>
