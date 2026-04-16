@@ -4,7 +4,7 @@ import Generator from "@/components/Generator";
 import AdCard from "@/components/AdCard";
 import { useState } from "react";
 
-export default function DashboardClient({ initialAds }: any) {
+export default function DashboardClient({initialAds}:any) {
   const [ads, setAds] = useState(initialAds);
 
   const handleDelete = (id: string) => {

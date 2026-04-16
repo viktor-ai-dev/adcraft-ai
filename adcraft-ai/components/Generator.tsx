@@ -11,6 +11,7 @@ const styles = [
 ];
 
 export default function Generator() {
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [style, setStyle] = useState("luxury");
@@ -26,6 +27,7 @@ export default function Generator() {
     try {
       const textRes = await fetch("/api/generate-text", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, description, style }),
       });
@@ -34,6 +36,7 @@ export default function Generator() {
 
       const imageRes = await fetch("/api/generate-images", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, description, style }),
       });

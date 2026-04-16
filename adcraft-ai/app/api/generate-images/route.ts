@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/ratelimit";
 import { auth } from "@clerk/nextjs/server";
+import { error } from "console";
 
 
 const openai = new OpenAI({
@@ -25,6 +26,7 @@ const styleMap: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
+
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
 
@@ -67,11 +69,19 @@ export async function POST(req: Request) {
       })
     );
 
-    const { userId } = auth();
-
-    if (!userId) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    const {userId} = await auth();
+    if(!userId){
+     return Response.json({error:"Unathorized"}, {status: 404});
     }
+
+    // 🔥 FIX: skapa user om den inte finns
+    await prisma.user.upsert({
+      where: { id: userId },
+      update: {},
+      create: {
+        id: userId,
+      },
+    });
 
     await prisma.ad.create({
       data: {
