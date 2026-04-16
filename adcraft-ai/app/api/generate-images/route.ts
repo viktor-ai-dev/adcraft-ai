@@ -2,6 +2,8 @@ import OpenAI from "openai";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/ratelimit";
+import { auth } from "@clerk/nextjs/server";
+
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -40,11 +42,11 @@ export async function POST(req: Request) {
     const selectedStyle = styleMap[style] || styleMap.luxury;
 
     const prompt = `
-Professional ecommerce product photography of ${name}.
-Description: ${description}.
-Style: ${selectedStyle}.
-Centered product, studio lighting, ultra realistic, 8K.
-`;
+    Professional ecommerce product photography of ${name}.
+    Description: ${description}.
+    Style: ${selectedStyle}.
+    Centered product, studio lighting, ultra realistic, 8K.
+    `;
 
     // GENERATE 3 IMAGES
     const images = await Promise.all(
@@ -65,12 +67,19 @@ Centered product, studio lighting, ultra realistic, 8K.
       })
     );
 
+    const { userId } = auth();
+
+    if (!userId) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     await prisma.ad.create({
       data: {
         name,
         description,
         style,
         images: JSON.stringify(images),
+        userId,
       },
     });
 

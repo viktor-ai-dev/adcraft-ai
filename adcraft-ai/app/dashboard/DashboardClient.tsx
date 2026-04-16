@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import Generator from "@/components/Generator";
 import AdCard from "@/components/AdCard";
+import { useState } from "react";
 
 export default function DashboardClient({ initialAds }: any) {
   const [ads, setAds] = useState(initialAds);
@@ -11,10 +12,18 @@ export default function DashboardClient({ initialAds }: any) {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-6">
-      {ads.map((ad: any) => (
-        <AdCard key={ad.id} ad={ad} onDelete={handleDelete(ad.id)} />
-      ))}
+    <div className="space-y-8">
+
+      {/* GENERATOR */}
+      <Generator />
+
+      {/* SAVED ADS */}
+      <div className="grid grid-cols-3 gap-6">
+        {ads.map((ad: any) => (
+          <AdCard key={ad.id} ad={ad} onDelete={handleDelete} />
+        ))}
+      </div>
+
     </div>
   );
 }

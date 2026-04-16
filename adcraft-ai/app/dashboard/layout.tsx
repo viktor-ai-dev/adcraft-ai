@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { UserButton } from "@clerk/nextjs";
+import { POST } from "../api/deleted-ad/route";
 
 export default function DashboardLayout({
   children,
@@ -28,7 +29,7 @@ export default function DashboardLayout({
             </a>
 
             <a
-              href="/"
+              href="#"
               className="block px-3 py-2 rounded hover:bg-gray-100"
             >
               ✨ Generate
