@@ -12,7 +12,6 @@ export default async function Page() {
     redirect("/sign-in");
   }
 
-  console.log("USER ID:", userId);
   const ads = await prisma.ad.findMany({
     where: {userId},
     orderBy: { createdAt: "desc" },
