@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 const styles = [
   { key: "luxury", label: "Luxury" },
@@ -41,6 +42,13 @@ export default function Generator() {
         body: JSON.stringify({ name, description, style }),
       });
 
+      if (!imageRes.ok){
+        const err = await imageRes.json();
+        toast.success(`Error: ${err}`);
+        setLoading(false);
+        return;
+      }
+
       const imageData = await imageRes.json();
 
       console.log("TEXT:", textData);
@@ -50,6 +58,7 @@ export default function Generator() {
         text: textData,
         images: imageData.images || [],
       });
+      window.location.reload();
 
     } catch (err) {
       console.error("GEN ERROR:", err);

@@ -23,6 +23,7 @@ export default function AdCard({ ad, onDelete }: any) {
     try {
       await fetch("/api/delete-ad", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

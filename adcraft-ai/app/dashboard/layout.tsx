@@ -1,12 +1,14 @@
 import { ReactNode } from "react";
 import { UserButton } from "@clerk/nextjs";
-import { POST } from "../api/deleted-ad/route";
+import {auth} from "@clerk/nextjs/server"
+import { getOrCreateUser } from "@/lib/getOrCreateUser";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default async function DashboardLayout({children}: {children: ReactNode}) {
+
+  //if user doesn't exist, create it first
+  const {userId} = await auth();
+  const user =   await getOrCreateUser(userId);
+
   return (
     <div className="min-h-screen flex bg-gray-50">
 
@@ -62,7 +64,9 @@ export default function DashboardLayout({
 
         {/* TOPBAR */}
         <header className="h-16 bg-white border-b flex items-center justify-between px-6">
-
+          <p className="text-sm text-gray-500">
+           Credits left: {user?.credits ?? 0}
+          </p>
           <h1 className="font-semibold">
             Dashboard
           </h1>
