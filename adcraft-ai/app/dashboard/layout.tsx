@@ -2,6 +2,8 @@ import { ReactNode } from "react";
 import { UserButton } from "@clerk/nextjs";
 import {auth} from "@clerk/nextjs/server"
 import { getOrCreateUser } from "@/lib/getOrCreateUser";
+import CreditsBar from "@/components/CreditsBar";
+
 
 export default async function DashboardLayout({children}: {children: ReactNode}) {
 
@@ -64,9 +66,10 @@ export default async function DashboardLayout({children}: {children: ReactNode})
 
         {/* TOPBAR */}
         <header className="h-16 bg-white border-b flex items-center justify-between px-6">
-          <p className="text-sm text-gray-500">
-           Credits left: {user?.credits ?? 0}
-          </p>
+          
+          {/* CREDITS BAR */}
+          <CreditsBar credits={user.credits} />
+
           <h1 className="font-semibold">
             Dashboard
           </h1>

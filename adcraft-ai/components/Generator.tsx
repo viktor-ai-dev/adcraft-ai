@@ -70,6 +70,7 @@ export default function Generator() {
       // Success
       toast.dismiss();
       toast.success("Ad generated successfully", {id: "gen"});
+      window.location.reload();
 
       console.log("TEXT:", textData);
       console.log("IMAGES:", imageData);
