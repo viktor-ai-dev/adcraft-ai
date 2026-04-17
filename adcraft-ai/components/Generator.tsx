@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import UpgradeModal from "@/components/UpgradeModal"
 
 const styles = [
   { key: "luxury", label: "Luxury" },
@@ -18,14 +19,22 @@ export default function Generator() {
   const [style, setStyle] = useState("luxury");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   const handleGenerate = async () => {
-    if (!name || !description || loading) return;
+    if(loading) return;
+    if (!name || !description){
+      toast.error("Please fill in all fields");
+      return;
+    }
 
     setLoading(true);
     setResult(null);
 
     try {
+
+      toast.loading("Generating your ads...", {id: "gen"})
+
       const textRes = await fetch("/api/generate-text", {
         method: "POST",
         credentials: "include",
@@ -42,14 +51,25 @@ export default function Generator() {
         body: JSON.stringify({ name, description, style }),
       });
 
+      const imageData = await imageRes.json();
+
       if (!imageRes.ok){
         const err = await imageRes.json();
-        toast.success(`Error: ${err}`);
+        
+        if(err.error == "No credits left"){
+          toast.error("You're out of credits");
+          setShowUpgrade(true);
+        } else {
+          toast.error(err.error);
+        }
+
         setLoading(false);
         return;
       }
 
-      const imageData = await imageRes.json();
+      // Success
+      toast.dismiss();
+      toast.success("Ad generated successfully", {id: "gen"});
 
       console.log("TEXT:", textData);
       console.log("IMAGES:", imageData);
@@ -58,13 +78,15 @@ export default function Generator() {
         text: textData,
         images: imageData.images || [],
       });
-      window.location.reload();
 
-    } catch (err) {
-      console.error("GEN ERROR:", err);
+    } catch (error) {
+      toast.dismiss();
+      toast.error("Unexpected error occurred");
+      console.error(error);
+
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -123,6 +145,7 @@ export default function Generator() {
         </div>
       )}
 
+      <UpgradeModal open={showUpgrade} onclose={ ()=>{setShowUpgrade(false)} } />
     </div>
   );
 }
