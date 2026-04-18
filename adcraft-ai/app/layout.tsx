@@ -4,6 +4,8 @@ import { auth } from "@clerk/nextjs/server";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import ClientButtonSignup from "@/components/ClientButtonSignup";
+import ClientButtonSignIn from "@/components/ClientButtonSignIn";
 
 
 const geistSans = Geist({
@@ -38,11 +40,12 @@ export default function RootLayout({children}: {children: React.ReactNode;}) {
             {
               !userId ? (
                 <>
-                  <SignInButton />
+                  <SignInButton>
+                    <ClientButtonSignIn/>
+                  </SignInButton>
+
                   <SignUpButton>
-                    <button className="bg-black text-white px-4 py-2 rounded-lg">
-                      Sign Up
-                    </button>
+                    <ClientButtonSignup />
                   </SignUpButton>
                 </>
               ) : ( <UserButton />)

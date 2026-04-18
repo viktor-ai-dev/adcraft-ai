@@ -57,7 +57,7 @@ export default function GeneratePage() {
           disabled={loading}
           whileTap={{ scale: 0.95 }}
           whileHover={{ scale: 1.02 }}
-          className="bg-black text-white px-4 py-3 rounded w-full"
+          className="bg-black text-white px-4 py-3 rounded-xl shadow hover:shadow-lg transition hover:scale-[1.02]"
         >
           {loading ? "Generating..." : "Generate"}
         </motion.button>

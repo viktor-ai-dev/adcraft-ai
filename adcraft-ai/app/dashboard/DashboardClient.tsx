@@ -11,16 +11,16 @@ import { motion } from "framer-motion"
 export default function DashboardClient({initialAds, user}: {initialAds:any, user:any}) {
 
   const [ads, setAds] = useState(initialAds);
-  const totalAds = initialAds.lengt;
+  const totalAds = ads.lengt;
 
   const last7Days = Array.from({length: 7}).map((_,i) =>{
 
     const day = new Date();
-    day.setDate(day.getDay()-i);
+    day.setDate(day.getDate()-i);
 
     const count = initialAds.filter((ad:Ad) => {
       const d = new Date(ad.createdAt);
-      d.toDateString() === day.toDateString();
+      return d.toDateString() === day.toDateString();
     }).lengt;
 
     return {
@@ -102,6 +102,22 @@ export default function DashboardClient({initialAds, user}: {initialAds:any, use
         <div>
           <h2 className="text-xl font-bold mb-4">Your Ads</h2>
 
+          {/* EMPTY STATE */}
+          {ads.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-xl shadow">
+              <h2 className="text-xl font-semibold">No ads yet</h2>
+              <p className="text-gray-500 text-sm mt-2">
+                Generate your first ad to get started
+              </p>
+
+              <a
+                href="/dashboard/generate"
+                className="inline-block mt-4 bg-black text-white px-5 py-2 rounded-xl hover:scale-105 transition"
+              >
+                Create Ad
+              </a>
+            </div>
+          ) : (
             <motion.div
               className="grid grid-cols-3 gap-4"
               initial="hidden"
@@ -110,24 +126,16 @@ export default function DashboardClient({initialAds, user}: {initialAds:any, use
                 hidden: {},
                 visible: {
                   transition: {
-                    delayChildren: 0.08,
+                    staggerChildren: 0.08,
                   },
                 },
-              }}>
-
-              {initialAds.length === 0 ? (
-                <div className="grid grid-cols-3 gap-4">
-                  { [1,2,3].map(i => <SkeletonCard key={i}/>) }
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-4">
-                  {initialAds.map((ad:any) => (
-                    <AdCard key={ad.id} ad={ad} />
-                  ))}
-                </div>
-              )}
+              }}
+            >
+              {ads.map((ad: any) => (
+                <AdCard key={ad.id} ad={ad} />
+              ))}
             </motion.div>
-         
+          )}
         </div>
       </div>
     </motion.div>

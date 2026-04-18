@@ -13,7 +13,7 @@ export default async function DashboardLayout({children}: {children: ReactNode})
   const user =   await getOrCreateUser(userId);
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-gradient-to-br from-gray-50 via-white to-gray-100">
 
       {/* SideBar */}
       <SideBar />
@@ -22,8 +22,7 @@ export default async function DashboardLayout({children}: {children: ReactNode})
       <div className="flex-1 flex flex-col">
 
         {/* TOPBAR */}
-        <header className="h-16 bg-white border-b flex items-center justify-between px-6">
-          
+        <header className="h-16 backdrop-blur-xl bg-white/70 border-b border-white/40 flex items-center justify-between px-6">
           {/* CREDITS BAR */}
           <CreditsBar credits={user.credits} />
 

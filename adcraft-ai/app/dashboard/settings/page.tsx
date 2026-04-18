@@ -31,7 +31,7 @@ export default async function SettingsPage() {
         <motion.button
           whileTap={{ scale: 0.95 }}
           whileHover={{ scale: 1.02 }}
-          className="mt-4 bg-black text-white px-4 py-2 rounded"
+          className="bg-black text-white px-4 py-3 rounded-xl shadow hover:shadow-lg transition hover:scale-[1.02]"
         >
            Upgrade (coming soon)
         </motion.button>

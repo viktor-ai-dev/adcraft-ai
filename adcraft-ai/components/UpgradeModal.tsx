@@ -28,28 +28,41 @@ export default function UpgradeModal({ open, onClose }: any) {
           <div className="border p-4 rounded-xl hover:border-black transition">
             <h3 className="font-bold">Pro</h3>
             <p className="text-sm text-gray-500">Unlimited ads</p>
-            <button className="mt-3 bg-black text-white w-full py-2 rounded">
+            
+           <motion.button
+              className="bg-black text-white px-4 py-3 rounded-xl shadow hover:shadow-lg transition hover:scale-[1.02]"
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}>
+
               Upgrade for $19/mo
-            </button>
+            </motion.button>
           </div>
 
           <div className="border p-4 rounded-xl hover:border-black transition">
             <h3 className="font-bold">Agency</h3>
             <p className="text-sm text-gray-500">Bulk + client mode</p>
-            <button className="mt-3 bg-black text-white w-full py-2 rounded">
+
+            <motion.button
+              className="bg-black text-white px-4 py-3 rounded-xl shadow hover:shadow-lg transition hover:scale-[1.02]"
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}>
+
               Upgrade for $49/mo
-            </button>
+            </motion.button>
           </div>
 
         </div>
 
         {/* CLOSE */}
-        <button
+        <motion.button
           onClick={onClose}
-          className="mt-6 text-sm text-gray-400 hover:underline"
-        >
+          className="bg-black text-white px-4 py-3 rounded-xl shadow hover:shadow-lg transition hover:scale-[1.02]"
+          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}>
+
           Maybe later
-        </button>
+        </motion.button>
+
       </motion.div>
     </div>
   );
