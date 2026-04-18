@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import {motion} from "framer-motion"
 
 export default function AdCard({ ad, onDelete }: any) {
   const [hovered, setHovered] = useState(false);
@@ -43,6 +44,14 @@ export default function AdCard({ ad, onDelete }: any) {
   };
 
   return (
+
+  <motion.div
+    initial = {{opacity: 0, scale: 0.95}}
+    animate = {{opacity: 1, scale: 1}}
+    whileHover={{scale: 1.03}}
+    transition={{duration: 0.3}}
+    className="group relative bg-white rounded-2x1 shadow hover:shadow-x1 overflow-hidden"
+  >
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -100,5 +109,6 @@ export default function AdCard({ ad, onDelete }: any) {
         </div>
       </div>
     </div>
+  </motion.div>
   );
 }

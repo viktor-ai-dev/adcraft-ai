@@ -1,5 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import {motion} from "framer-motion"
+
 
 export default async function SettingsPage() {
   const { userId } = auth();
@@ -26,9 +28,13 @@ export default async function SettingsPage() {
         <h2 className="font-semibold mb-2">Plan</h2>
         <p className="text-sm text-gray-500">Free Plan</p>
 
-        <button className="mt-4 bg-black text-white px-4 py-2 rounded">
-          Upgrade (coming soon)
-        </button>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          className="mt-4 bg-black text-white px-4 py-2 rounded"
+        >
+           Upgrade (coming soon)
+        </motion.button>
       </div>
 
       {/* CREDITS */}

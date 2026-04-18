@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import UpgradeModal from "@/components/UpgradeModal"
+import { motion } from "framer-motion";
 
 const styles = [
   { key: "luxury", label: "Luxury" },
@@ -96,15 +97,18 @@ export default function Generator() {
       {/* STYLE */}
       <div className="flex gap-2 flex-wrap">
         {styles.map((s) => (
-          <button
+
+          <motion.button
             key={s.key}
             onClick={() => setStyle(s.key)}
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
             className={`px-3 py-1 rounded border ${
               style === s.key ? "bg-black text-white" : ""
-            }`}
-          >
-            {s.label}
-          </button>
+            }`}>
+
+           {s.label}
+          </motion.button>
         ))}
       </div>
 
@@ -121,13 +125,17 @@ export default function Generator() {
         onChange={(e) => setDescription(e.target.value)}
       />
 
-      <button
+      <motion.button
         onClick={handleGenerate}
         disabled={loading}
         className="bg-black text-white px-4 py-3 rounded w-full"
-      >
+        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.02 }}
+        >
+
         {loading ? "Generating..." : "Generate Ads"}
-      </button>
+      </motion.button>
+
 
       {/* RESULT */}
       {result && (

@@ -16,6 +16,10 @@ export default async function Page() {
     where: {userId},
     orderBy: { createdAt: "desc" },
   });
+
+  const user = await prisma.user.findUnique({
+    where: {id: userId}
+  });
   
-  return <DashboardClient initialAds={ads} />;
+  return <DashboardClient initialAds={ads} user={user}/>;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion"
 
 export default function GeneratePage() {
   const [name, setName] = useState("");
@@ -51,13 +52,15 @@ export default function GeneratePage() {
           onChange={(e) => setDescription(e.target.value)}
         />
 
-        <button
+        <motion.button
           onClick={handleGenerate}
           disabled={loading}
+          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
           className="bg-black text-white px-4 py-3 rounded w-full"
         >
           {loading ? "Generating..." : "Generate"}
-        </button>
+        </motion.button>
       </div>
 
       {/* RESULTS */}
@@ -71,6 +74,19 @@ export default function GeneratePage() {
             />
           ))}
         </div>
+      )}
+
+      {/* Loading animation */}
+      {loading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-sm text-gray-500 space-y-2"
+        >
+          <p className="animate-pulse">✨ Writing ad copy...</p>
+          <p className="animate-pulse">🎨 Generating visuals...</p>
+          <p className="animate-pulse">🚀 Finalizing...</p>
+        </motion.div>
       )}
     </div>
   );
