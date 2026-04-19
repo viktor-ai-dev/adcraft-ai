@@ -1,8 +1,32 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function Landing() {
+
+  const [step, setStep] = useState<"idle" | "loading" | "done">("idle");
+
+  useEffect(() => {
+    let alive = true;
+
+    const loop = async () => {
+      while (alive) {
+        setStep("loading");
+        await new Promise(r => setTimeout(r, 2000));
+
+        setStep("done");
+        await new Promise(r => setTimeout(r, 3000));
+      }
+    };
+
+    loop();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-gray-100">
 
@@ -64,46 +88,77 @@ export default function Landing() {
           className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-2xl rounded-2xl p-6"
         >
 
-          {/* FAKE GENERATOR */}
-          <div className="space-y-3">
+        {/* FAKE GENERATOR */}
+        <div className="space-y-3">
+          <input
+            disabled
+            value="Luxury Watch"
+            className="border p-3 w-full rounded bg-gray-100"
+          />
 
-            <input
-              disabled
-              value="Luxury Watch"
-              className="border p-3 w-full rounded bg-gray-100"
-            />
+          <textarea
+            disabled
+            value="Premium gold watch for modern men"
+            className="border p-3 w-full rounded bg-gray-100"
+          />
 
-            <textarea
-              disabled
-              value="Premium gold watch for modern men"
-              className="border p-3 w-full rounded bg-gray-100"
-            />
+          <motion.div
+            key={step}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className={`px-4 py-3 rounded text-center text-white ${
+              step === "done" ? "bg-green-500" : "bg-black"
+            }`}
+          >
+            {step === "loading" && "✨ Generating ads..."}
+            {step === "done" && "✅ Ads Generated"}
+          </motion.div>
+        </div>
 
-            <div className="bg-black text-white px-4 py-3 rounded text-center animate-pulse">
-              Generating ads...
-            </div>
+        {/* FAKE RESULTS */}
+      <motion.div
+        className="grid grid-cols-3 gap-4 mt-6"
+        initial="hidden"
+        animate={step === "done" ? "visible" : "hidden"}
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.15,
+            },
+          },
+        }}
+      >
+      {[
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
+        "https://images.unsplash.com/photo-1519741497674-611481863552",
+        "https://images.unsplash.com/photo-1491553895911-0055eca6402d",
+      ].map((src, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="rounded-xl overflow-hidden shadow hover:scale-105 transition bg-white"
+        >
+          <img
+            src={src}
+            className="h-40 w-full object-cover"
+          />
 
+          <div className="p-3">
+            <p className="text-xs text-gray-500">Luxury Ad</p>
+            <p className="text-sm font-semibold">Premium Style</p>
           </div>
-
-          {/* FAKE RESULTS */}
-          <div className="grid grid-cols-3 gap-4 mt-6">
-
-            {[1,2,3].map((i) => (
-              <div
-                key={i}
-                className="h-40 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl animate-pulse"
-              />
-            ))}
-
-          </div>
-
         </motion.div>
+    ))}
+      </motion.div>
 
+      </motion.div>
       </section>
 
       {/* FEATURES */}
       <section className="grid grid-cols-3 gap-6 max-w-5xl mx-auto px-6 pb-20">
-
         {[
           {
             title: "AI Ad Copy",
@@ -123,13 +178,12 @@ export default function Landing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + i * 0.1 }}
-            className="p-6 bg-white rounded-2xl shadow hover:shadow-xl transition"
-          >
+            className="p-6 bg-white rounded-2xl shadow hover:shadow-xl transition">
+
             <h3 className="font-bold mb-2">{f.title}</h3>
             <p className="text-sm text-gray-500">{f.desc}</p>
           </motion.div>
         ))}
-
       </section>
 
       {/* CTA */}
