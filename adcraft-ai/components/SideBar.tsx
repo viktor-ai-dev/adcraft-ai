@@ -1,11 +1,18 @@
 "use client";
+
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export default function SideBar() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const nav = [
     { name: "Dashboard", href: "/dashboard", icon: "🧠" },
@@ -17,14 +24,11 @@ export default function SideBar() {
   return (
     <aside className="w-64 backdrop-blur-xl bg-white/70 border-r border-white/40 shadow-lg hidden md:flex flex-col justify-between">
       
-      {/* LOGO */}
       <div>
-        <div 
-            className="p-6 text-xl font-bold border-black">
-            AdCraft AI
+        <div className="p-6 text-xl font-bold border-black">
+          AdCraft AI
         </div>
 
-        {/* NAV */}
         <nav className="p-4 space-y-2 text-sm">
           {nav.map((item, i) => (
             <motion.div
@@ -51,9 +55,8 @@ export default function SideBar() {
         </nav>
       </div>
 
-      {/* USER */}
       <div className="p-4 border-t">
-        <UserButton />
+        {mounted ? <UserButton /> : null}
       </div>
     </aside>
   );

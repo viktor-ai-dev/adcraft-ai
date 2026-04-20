@@ -43,8 +43,17 @@ export async function POST(req: Request) {
 
     const user = await getOrCreateUser(userId);
 
+    // For testing purpose only.
     if (user.credits <= 0) {
-      return Response.json({ error: "No credits left" }, { status: 403 });
+        await prisma.user.update({
+        where:{id: userId},
+        data: {
+          credits:5
+        }
+    }).finally(()=>{
+      console.log("Updated credits to 5: ", user.credits);
+    });
+      //return Response.json({ error: "No credits left" }, { status: 403 });
     }
 
     const selectedStyle = styleMap[style] || styleMap.luxury;
