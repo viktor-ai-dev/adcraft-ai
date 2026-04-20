@@ -10,14 +10,45 @@ export default function AdCard({ ad, onDelete }: any) {
 
   const images = JSON.parse(ad.images || "[]");
 
+  let headline = null;
+  try {
+    headline = ad.headlines ? JSON.parse(ad.headlines)[0] : null;
+  } catch {}
+
+  // 🧠 ACTIONS
+
   const handleCopy = () => {
     navigator.clipboard.writeText(ad.description);
-    toast.success("Copied to clipboard ✨");
+    toast.success("Description copied ✨");
+  };
+
+  const handleCopyFull = () => {
+    const fullAd = `
+${headline || ""}
+${ad.description}
+
+CTA: ${ad.cta || ""}
+    `;
+    navigator.clipboard.writeText(fullAd);
+    toast.success("Full ad copied 🚀");
+  };
+
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = images?.[0];
+    link.download = `${ad.name}.png`;
+    link.click();
+
+    toast.success("Image downloaded 📸");
+  };
+
+  const handleShare = () => {
+    // Fake viral UX (portfolio trick)
+    toast.success("Shared 🚀 (demo)");
   };
 
   const handleDelete = async () => {
-    const confirmDelete = confirm("Delete this ad?");
-    if (!confirmDelete) return;
+    if (!confirm("Delete this ad?")) return;
 
     setLoading(true);
 
@@ -31,9 +62,8 @@ export default function AdCard({ ad, onDelete }: any) {
       });
 
       toast.success("Ad deleted 🗑️");
-
       onDelete?.(ad.id);
-    } catch (err) {
+    } catch {
       toast.error("Failed to delete");
     } finally {
       setLoading(false);
@@ -62,21 +92,35 @@ export default function AdCard({ ad, onDelete }: any) {
 
         {/* ACTIONS */}
         <div
-          className={`absolute top-2 right-2 flex gap-2 transition ${
+          className={`absolute top-2 right-2 flex flex-wrap gap-2 transition ${
             hovered ? "opacity-100" : "opacity-0"
           }`}
         >
           <button
-            onClick={handleCopy}
-            className="bg-black text-white px-4 py-2 rounded-xl text-xs"
+            onClick={handleDownload}
+            className="bg-black text-white px-2 py-1 rounded text-xs"
           >
-            Copy
+            Download
+          </button>
+
+          <button
+            onClick={handleCopyFull}
+            className="bg-black text-white px-2 py-1 rounded text-xs"
+          >
+            Copy Ad
+          </button>
+
+          <button
+            onClick={handleShare}
+            className="bg-black text-white px-2 py-1 rounded text-xs"
+          >
+            Share
           </button>
 
           <button
             onClick={handleDelete}
             disabled={loading}
-            className="bg-black text-white px-4 py-2 rounded-xl text-xs"
+            className="bg-black text-white px-2 py-1 rounded text-xs"
           >
             {loading ? "..." : "Delete"}
           </button>
@@ -89,15 +133,35 @@ export default function AdCard({ ad, onDelete }: any) {
       </div>
 
       {/* CONTENT */}
-      <div className="p-4 space-y-2">
-        <p className="text-xs text-gray-500 line-clamp-2">
-          {ad.description}
-        </p>
+      <div className="p-4 space-y-3">
 
-        <div className="flex justify-between text-xs text-gray-400">
-          <span>{ad.style}</span>
+        {/* HEADLINE */}
+        {headline && (
+          <p className="text-sm font-semibold text-gray-800 line-clamp-2">
+            {headline}
+          </p>
+        )}
+
+        {/* DESCRIPTION */}
+        {!headline && (
+          <p className="text-xs text-gray-500 line-clamp-2">
+            {ad.description}
+          </p>
+        )}
+
+        {/* CTA */}
+        {ad.cta && (
+          <span className="inline-block text-[10px] bg-black text-white px-2 py-1 rounded">
+            {ad.cta}
+          </span>
+        )}
+
+        {/* FOOTER */}
+        <div className="flex justify-between text-xs text-gray-400 pt-2">
+          <span className="capitalize">{ad.style}</span>
           <span>{new Date(ad.createdAt).toLocaleDateString()}</span>
         </div>
+
       </div>
     </motion.div>
   );

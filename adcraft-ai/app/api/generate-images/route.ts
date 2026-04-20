@@ -3,9 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/ratelimit";
 import { auth } from "@clerk/nextjs/server";
-import { error } from "console";
 import { getOrCreateUser } from "@/lib/getOrCreateUser";
-
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -19,33 +17,35 @@ const schema = z.object({
 
 const styleMap: Record<string, string> = {
   luxury: "luxury branding, gold accents, premium studio lighting",
-  minimal: "clean minimal design, white background",
+  minimal: "clean minimal design, white background, soft shadows",
   bold: "high contrast, colorful, dramatic lighting",
-  tech: "futuristic neon lighting, modern aesthetic",
-  viral: "social media ad, eye-catching composition",
+  tech: "futuristic neon lighting, modern aesthetic, cyber style",
+  viral: "social media ad, eye-catching composition, trending style",
 };
 
 export async function POST(req: Request) {
-
   try {
+    const { userId } = await auth();
 
-    const {userId} = await auth();
-    if(!userId){
-     return Response.json({error:"Unathorized"}, {status: 401});
+    if (!userId) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
 
-    // RATE LIMIT FIXED
     if (!rateLimit(ip, 10, 60000)) {
-      return Response.json(
-        { error: "Too many requests" },
-        { status: 429 }
-      );
+      return Response.json({ error: "Too many requests" }, { status: 429 });
     }
 
     const body = await req.json();
     const { name, description, style = "luxury" } = schema.parse(body);
+
+    const user = await getOrCreateUser(userId);
+
+    if (user.credits <= 0) {
+      return Response.json({ error: "No credits left" }, { status: 403 });
+    }
 
     const selectedStyle = styleMap[style] || styleMap.luxury;
 
@@ -56,7 +56,6 @@ export async function POST(req: Request) {
     Centered product, studio lighting, ultra realistic, 8K.
     `;
 
-    // GENERATE 3 IMAGES
     const images = await Promise.all(
       Array.from({ length: 3 }).map(async () => {
         const response = await openai.images.generate({
@@ -75,18 +74,6 @@ export async function POST(req: Request) {
       })
     );
 
-    // Make sure user exists to check credits
-    const user = await getOrCreateUser(userId);
-
-    if(user.credits <=0)
-    {
-      return Response.json(
-        {error: "No credits left"},
-        {status: 403}
-      );
-    }
-
-    // Save the Ad
     await prisma.ad.create({
       data: {
         name,
@@ -97,21 +84,19 @@ export async function POST(req: Request) {
       },
     });
 
-    // Minska credit med 1
     await prisma.user.update({
-      where: {id: userId},
+      where: { id: userId },
       data: {
-        credits: {decrement: 1},
-      }
+        credits: { decrement: 1 },
+      },
     });
 
     return Response.json({ images });
-
   } catch (error: any) {
     console.error("OPENAI ERROR:", error);
 
     return Response.json(
-      { error: error.message },
+      { error: error.message || "Something went wrong" },
       { status: 500 }
     );
   }

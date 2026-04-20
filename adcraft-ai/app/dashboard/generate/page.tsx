@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
 
 export default function GeneratePage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [style, setStyle] = useState("luxury");
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
 
@@ -21,7 +22,7 @@ export default function GeneratePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, description }),
+        body: JSON.stringify({ name, description, style }),
       });
 
       const data = await res.json();
@@ -35,11 +36,11 @@ export default function GeneratePage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-
       <h1 className="text-2xl font-bold">Generate Ads</h1>
 
       {/* INPUT */}
       <div className="bg-white p-6 rounded-xl shadow space-y-3">
+
         <input
           placeholder="Product name"
           className="border p-3 w-full rounded"
@@ -52,12 +53,25 @@ export default function GeneratePage() {
           onChange={(e) => setDescription(e.target.value)}
         />
 
+        {/* STYLE SELECT */}
+        <select
+          value={style}
+          onChange={(e) => setStyle(e.target.value)}
+          className="border p-3 w-full rounded"
+        >
+          <option value="luxury">Luxury</option>
+          <option value="minimal">Minimal</option>
+          <option value="bold">Bold</option>
+          <option value="tech">Tech</option>
+          <option value="viral">Viral</option>
+        </select>
+
         <motion.button
           onClick={handleGenerate}
           disabled={loading}
           whileTap={{ scale: 0.95 }}
           whileHover={{ scale: 1.02 }}
-          className="bg-black text-white px-4 py-3 rounded-xl shadow hover:shadow-lg transition hover:scale-[1.02]"
+          className="bg-black text-white px-4 py-3 rounded-xl shadow hover:shadow-lg transition"
         >
           {loading ? "Generating..." : "Generate"}
         </motion.button>
@@ -67,26 +81,18 @@ export default function GeneratePage() {
       {images.length > 0 && (
         <div className="grid grid-cols-3 gap-4">
           {images.map((img, i) => (
-            <img
-              key={i}
-              src={img}
-              className="rounded-xl shadow"
-            />
+            <img key={i} src={img} className="rounded-xl shadow" />
           ))}
         </div>
       )}
 
-      {/* Loading animation */}
+      {/* LOADING */}
       {loading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-sm text-gray-500 space-y-2"
-        >
+        <div className="text-sm text-gray-500 space-y-2">
           <p className="animate-pulse">✨ Writing ad copy...</p>
           <p className="animate-pulse">🎨 Generating visuals...</p>
           <p className="animate-pulse">🚀 Finalizing...</p>
-        </motion.div>
+        </div>
       )}
     </div>
   );
